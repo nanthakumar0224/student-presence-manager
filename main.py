@@ -377,7 +377,7 @@ def attendance(classname, classid):
 
 
 #save attendance
-def insert_attendance(student_slno, present, absent, current_date, classname):
+def insert_attendance(register_number, present, absent, current_date, classname):
     try:
         conn = sqlite3.connect('data_base.db')
         cursor = conn.cursor()
@@ -387,49 +387,55 @@ def insert_attendance(student_slno, present, absent, current_date, classname):
         VALUES (?, ?, ?, ?)
         """
 
-        cursor.execute(query, (student_slno, current_date, present, absent))
+        cursor.execute(query, (register_number, current_date, present, absent))
         conn.commit()
         conn.close()
 
     except Exception as e:
         print(f"Error inserting attendance: {e}")
 
+
 @app.route('/save_attendance', methods=['POST'])
 def save_attendance():
     current_date = datetime.date.today().strftime('%Y-%m-%d')
-    in_classname = request.form['classname']  
-    processed_students = set()  
+    in_classname = request.form['classname']
+    processed_students = set()
 
-    for slno in request.form:
-        if slno.startswith('p'):  
+    for key in request.form:
+        if key.startswith('p'):
             try:
-                student_slno = slno.split('_')[1] 
-                student_slno = int(student_slno)  
+                student_slno = key.split('_')[1]  # Extract serial number (slno)
+                student_slno = int(student_slno)
 
-               
-                if student_slno in processed_students:
+                # Get register number (rollno) from form data
+                register_no = request.form.get(f'reg_{student_slno}')
+
+                if not register_no:
+                    print(f"Error: Register number not found for slno {student_slno}")
+                    continue
+
+                if register_no in processed_students:
                     continue
 
                 present = 0
                 absent = 0
 
-              
                 for period in range(1, 9):
-                  
                     if f'p{period}_{student_slno}' in request.form:
-                        present += 1 
+                        present += 1
                     else:
-                        absent += 1 
+                        absent += 1
 
-                insert_attendance(student_slno, present, absent, current_date, in_classname)
-              
-                processed_students.add(student_slno)
+                insert_attendance(register_no, present, absent, current_date, in_classname)
+
+                processed_students.add(register_no)
 
             except IndexError:
-                print(f"Error processing attendance for form field: {slno}")
+                print(f"Error processing attendance for form field: {key}")
                 continue
 
     return "Attendance updated successfully!"
+
 
 #----------------------------------------------------------------------------------------------------#
 
@@ -439,12 +445,144 @@ def save_attendance():
 
 @app.route('/report_generate_form')
 def report_generate_form():
-    return render_template("report_generate_form.html")
+    conn = sqlite3.connect("data_base.db")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT DISTINCT classname FROM all_classes")  # Change table name if needed
+    classes = [row[0] for row in cursor.fetchall()]
+
+    conn.close()
+    return render_template("report_generate_form.html",classes=classes)
 
 
 # add the after search report form procss
-
 #------------------------------------------------------------------------------------------------------------------#
+def get_students_attendance(classname, start_date, end_date):
+    conn = sqlite3.connect("data_base.db")
+    cursor = conn.cursor()
 
-if (__name__ == '__main__'):
-    app.run()
+    query = f"""
+        SELECT s.name, s.rollno, s.dept, s.year, 
+               SUM(c.present) AS total_present_hours, 
+               COUNT(DISTINCT c.date) AS total_days
+        FROM all_students s
+        JOIN {classname} c ON s.rollno = c.rollno
+        WHERE c.date BETWEEN ? AND ?
+        GROUP BY s.rollno
+    """
+
+    cursor.execute(query, (start_date, end_date))
+    students = cursor.fetchall()
+    conn.close()
+
+    report = []
+    for student in students:
+        name, rollno, dept, year, present_hours, total_days = student
+        attendance_percentage = (present_hours / (total_days * 8)) * 100 if total_days > 0 else 0
+
+        report.append({
+            "name": name,
+            "rollno": rollno,
+            "dept": dept,
+            "year": year,
+            "total_present_hours": present_hours,
+            "total_days": total_days,
+            "attendance_percentage": round(attendance_percentage, 2)
+        })
+
+    return report
+
+
+@app.route('/get_attendance_report_inputs', methods=['GET','POST'])
+def get_attendance_report_inputs():
+    classname=request.form.get('classname')
+    dept = request.form.get('dept')
+    year = request.form.get('year')
+    start_date = request.form.get('start_date')
+    end_date = request.form.get('end_date')
+
+    report_data = get_students_attendance(classname, start_date, end_date)
+
+    return render_template("attendance_report.html",
+                           report_data=report_data,
+                           department=dept,
+                           start_date=start_date,
+                           end_date=end_date,year=year,classname=classname)
+
+@app.route('/download_excel', methods=['GET'])
+def download_excel():
+    classname = request.args.get('classname')
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+
+    report_data = get_students_attendance(classname, start_date, end_date)
+
+    df = pd.DataFrame(report_data)
+    df["Student Sign"] = ""  # Empty column for signatures
+
+    excel_file = "attendance_report.xlsx"
+    df.to_excel(excel_file, index=False)
+
+    return send_file(excel_file, as_attachment=True)
+
+
+def get_attendance_percentage(rollno, dept, year, classname):
+    conn = sqlite3.connect("data_base.db")
+    cursor = conn.cursor()
+
+    # Fetch student name from all_students table
+    cursor.execute("SELECT name FROM all_students WHERE rollno = ? AND dept = ? AND year = ?", (rollno, dept, year))
+    student = cursor.fetchone()
+
+    if not student:
+        conn.close()
+        return {"error": "Student not found."}
+
+    student_name = student[0]
+
+    # Get attendance data
+    query = f"""
+        SELECT SUM(present) AS total_present_hours, COUNT(DISTINCT date) AS total_days
+        FROM {classname}  
+        WHERE rollno = ?
+    """
+    cursor.execute(query, (rollno,))
+    result = cursor.fetchone()
+    conn.close()
+
+    if not result or result[1] == 0:  # No attendance data found
+        return {"name": student_name, "attendance_percentage": 0.0}
+
+    total_present_hours, total_days = result
+    total_days-=1
+    attendance_percentage = (total_present_hours / (total_days * 8)) * 100 if total_days else 0
+
+    return {
+        "name": student_name,
+        "attendance_percentage": round(attendance_percentage, 2)
+    }
+
+
+@app.route('/others_report',methods=['GET','POST'])
+def others_report():
+    attendance_percentage = None
+    if request.method == "POST":
+        rollno = request.form["rollno"]
+        dept = request.form["dept"]
+        year = request.form["year"]
+        classname = request.form["classname"]
+
+        student_data = get_attendance_percentage(rollno, dept, year, classname)
+
+    conn = sqlite3.connect("data_base.db")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT DISTINCT classname FROM all_classes")  # Change table name if needed
+    classes = [row[0] for row in cursor.fetchall()]
+
+    conn.close()
+    return render_template('other/report.html',classes=classes,student_data=student_data)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
