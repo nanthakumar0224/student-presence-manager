@@ -2,112 +2,128 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report Table</title>
+    <title>Generate Report</title>
     <style>
-        body {
+        *{
+            margin: 0;
+            padding:0 ;
+            box-sizing: border-box;
+        }
+        body{
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
             font-family: Arial, sans-serif;
-            margin: 20px;
+            flex-direction: column;
+        }
+        form{
+            display: flex;
+            flex-direction: column;
+            padding: 50px;
+            gap:10px;
+            box-shadow: 5px 5px 5px rgb(143, 141, 141);
+            border-top-left-radius: 50px;
+            border-bottom-right-radius: 50px;
+            border: 0.1px solid rgb(187, 183, 183);
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        th, td {
-            padding: 10px;
+        form h2{
+            margin-bottom: 25px;
             text-align: center;
-            border: 1px solid #ddd;
+            font-weight: 700;
         }
-
-        th {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        tr:hover {
-            background-color: #ddd;
-        }
-
-        button {
-            padding: 10px 15px;
-            margin-right: 10px;
-            cursor: pointer;
-            background-color: #4CAF50;
-            color: white;
+        input[type="submit"]{
+            height: 34px;
+            font-size: 15px;
+            font-weight: 550;
+            box-shadow: 1px 1px 1px gray;
             border: none;
-            border-radius: 5px;
-            font-size: 16px;
+            border-radius: 3px;
+            color: white;
+            padding: 2px;
+            background-color:#007BFF;
+            margin-top: 20px;
+            cursor: pointer;
         }
 
-        button:hover {
-            background-color: #45a049;
+        input[type="submit"]:hover{
+            transform: scale(1.01);
+        }
+
+        input[type="text"], input[type="date"], input[type="number"] {
+            height: 27px;
+            text-indent: 5px;
+            border-radius: 3px;
+            font-size: 15px;
+            font-weight: 550;
+            border-color: rgb(187, 184, 184);
+        }
+
+        input:focus{
+            outline: none;
+            border-color: #007BFF;
+        }
+        label{
+            font-size: 18px;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
         }
     </style>
 </head>
 <body>
+    <form action="{{ url_for('others_report') }}" method="post">
 
-    <table id="attendanceTable">
-        <thead>
-            <tr>
-                <th>SL.NO</th>
-                <th>ROLL.NO</th>
-                <th>NAME</th>
-                <th>PRESENT</th>
-                <th>ABSENT</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{data['slno']}}</td>
-                <td>{{data['rollno']}}</td>
-                <td>{{data['name']}}</td>
-                <td>{{data['present']}}</td>
-                <td>{{data['absent']}}</td>
-            </tr>
-        </tbody>
-    </table>
+        <h2>Get Current Attendance Percentage</h2>
 
-    <button onclick="printTable()">PRINT</button>
-    <button onclick="downloadTableAsExcel()">DOWNLOAD</button>
+        <label for="select">Department Name</label>
+        <select name="dept">
+            <option>COMPUTER ENGINEERING</option>
+            <option>INFORMATION TECHNOLOGY</option>
+            <option>CIVIL ENGINEERING</option>
+            <option>ELECTRICAL AND ELECTRONIC ENGINEERING</option>
+            <option>MECHANICAL ENGINEERING</option>
+            <option>AUTOMOBILE ENGINEERING</option>
+            <option>ELECTRICAL AND COMMUNICATION ENGINEERING</option>
+        </select>
 
-    <script>
-        // Print table function
-        function printTable() {
-            var table = document.getElementById("attendanceTable");
-            var printWindow = window.open('', '', 'height=500, width=800');
-            printWindow.document.write('<html><head><title>Student Attendance Report</title>');
-            printWindow.document.write('<style>table { width: 100%; border-collapse: collapse; } th, td { padding: 10px; text-align: center; border: 1px solid #ddd; } th { background-color: #4CAF50; color: white; } tr:nth-child(even) { background-color: #f2f2f2; }</style></head><body>');
-            printWindow.document.write(table.outerHTML);
-            //printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.print();
-        }
+        <label for="year">Year</label>
+        <select name="year">
+            <option>I</option>
+            <option>II</option>
+            <option>III</option>
+        </select>
 
-        // Function to download the table as an Excel file
-        function downloadTableAsExcel() {
-            var table = document.getElementById("attendanceTable");
-            var excelFile = tableToExcel(table);
-            var link = document.createElement('a');
-            link.href = excelFile;
-            link.download = 'attendance_report.xlsx';
-            link.click();
-        }
+        <label for="classname">Select Class:</label>
+        <select name="classname" id="classname">
+            {% for cls in classes %}
+                <option value="{{ cls }}">{{ cls }}</option>
+            {% endfor %}
+        </select>
 
-        // Convert HTML Table to Excel File (Data URI)
-        function tableToExcel(table) {
-            var tableHtml = table.outerHTML;
-            var excelBlob = new Blob([tableHtml], { type: 'application/vnd.ms-excel' });
-            var excelUrl = URL.createObjectURL(excelBlob);
-            return excelUrl;
-        }
-    </script>
+        <label for="regno">Register No :</label>
+        <input type="number" name="rollno" placeholder="Search by Register No" required>
+
+        <input type="submit" value="GENERATE REPORT">
+    </form>
+
+    {% if student_data %}
+    {% if "error" in student_data %}
+        <p style="color: red;">{{ student_data.error }}</p>
+    {% else %}
+    <div class="result">
+
+        <p><strong>Student Name:</strong> {{ student_data.name }}</p>
+        <p><strong>Your Current Attendance Percentage:</strong> <span style="color: blue;">{{ student_data.attendance_percentage }}%</span></p>
+    </div>
+    {% endif %}
+{% endif %}
 
 </body>
 </html>
