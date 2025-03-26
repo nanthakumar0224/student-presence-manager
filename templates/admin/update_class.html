@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPDATE CLASS</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+        }
+        form{
+            display: flex;
+            flex-direction: column;
+            padding: 50px;
+            gap:10px;
+            box-shadow: 5px 5px 5px rgb(143, 141, 141);
+            background-color: #007BFF;
+            border-top-left-radius: 50px;
+            border-bottom-right-radius: 50px;
+        }
+
+        form h2{
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 700;
+        }
+        .btn_group{
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        input[type="submit"],input[type="reset"]{
+            width: 70px;
+            height: 30px;
+            font-size: 15px;
+            font-weight: 550;
+            box-shadow: 4px 4px 4px gray;
+            border: none;
+            border-radius: 3px;
+            color: white;
+            padding: 2px;
+            cursor: pointer;
+        }
+        input[type="submit"]{
+            background-color: #28a745;
+        }
+
+        input[type="reset"]{
+            background-color:#dc3545;
+        }
+
+        input[type="submit"]:hover,input[type="reset"]:hover{
+            transform: scale(1.05);
+        }   
+
+        input[type="text"],input[type="number"]{
+            height: 27px;
+            text-indent: 5px;
+            border-radius: 3px;
+            border: none;
+            font-size: 15px;
+            font-weight: 550;
+        }
+
+        input:focus{
+            outline: none;
+            border-color: #007BFF;
+        }
+        label{
+            font-size: 18px;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <form action="/update_class" method="post">
+        <h2>UPDATE CLASS</h2>
+        <label for="classname" style="display:none;">OLD CLASS NAME :</label>
+        <input type="text" readonly name="oldclassname" value="{{data['classname']}}" style="display:none;">
+        <label for="classteacher" style="display:none;">OLD TEACHER NAME :</label>
+        <input type="text" readonly name="oldclassteacher" value="{{data['classteacher']}}" style="display:none;">
+        <label for="classname">CLASS NAME :</label>
+        <input type="text" required name="classname" value="{{data['classname']}}">
+        <label for="classteacher">CLASS TEACHER :</label>
+        <input type="text" required name="classteacher" value="{{data['classteacher']}}">
+        <label for="classid">CLASS ID</label>
+        <input type="number" readonly name="classid" value="{{data['classid']}}">
+
+        <div class="btn_group">
+            <input type="submit" value="UPDATE">
+            <input type="reset" value="CLEAR">
+        </div>
+    </form>
+</body>
+</html>

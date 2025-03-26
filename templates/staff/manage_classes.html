@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STUDENT PRESENCE MANAGER</title>
+    <link rel="stylesheet" href="\static\css\manage_classes.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <img src="\static\images\logo.jpg">
+        <ul>
+            <li><a href="{{url_for('manage_classes_staff')}}">Manage Classes</a></li>
+            <li><a href="#">Manage Reports</a></li>
+            <li><a href="{{url_for('home')}}">Logout</a></li>
+        </ul>
+    </div>
+
+    <div class="img_container">
+
+        <form action="/create_class" class="create-class-form" method="post" enctype="multipart/form-data">
+            <h1>CREATE CLASS</h1>
+
+            <label for="classname">Class Name</label>
+            <input type="text" name="classname" placeholder="Class Name"  required>
+
+            <label for="classid">Class Id</label>
+            <input type="text" name="classid" placeholder="Class Id"  required>
+
+            
+            <label for="select">Department Name</label>
+            <select name="dept">
+                <option name="dept">COMPUTER ENGINEERING</option>
+                <option name="dept">INFORMATION TECHNOLOGY</option>
+                <option name="dept">CIVIL ENGINEERING</option>
+                <option name="dept">ELECTRICAL AND ELECTRONIC ENGINEERING</option>
+                <option name="dept">MECHANICAL ENGINEERING</option>
+                <option name="dept">AUTOMOBILE ENGINEERING</option>
+                <option name="dept">ELECTRICAL AND COMMUNICATION ENGINEERING</option>
+            </select>
+
+            <label for="year">Year</label>
+            <select name="year">
+                <option name="year">I</option>
+                <option name="year">Ii</option>
+                <option name="year">III</option>
+            </select>
+
+            <label for="staffname">Staff Name</label>
+            <input type="text" name="staffname" placeholder="Staff Name"  readonly value= {{staffname}}>
+
+            <label for="staffid">Staff Id</label>
+            <input type="number" name="staffid" placeholder="Staff Id"  readonly value= {{staffid}}>
+
+
+            <label for="file">Upload your student details Excel file</label>
+            <input type="file" name="file" accept=".xlsx, .xls" class="file-upload" required>
+            <button type="submit">Create</button>
+        </form>
+
+
+        <div class="all-attendance-table">
+            <h1>ALL CLASSES</h1>
+
+            <div class="search-box">
+                <form>
+                    <input type="search" name="search" required placeholder="Search">
+                    <button>search</button>
+                </form>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>CLASS NAME</th>
+                        <th>CLASS ID </th>
+                        <th>STAFF NAME </th>
+                        <th>STAFF ID </th>
+                        <th>DEPT</th>
+                        <th>YEAR</th>
+                        <th>ATTENDANCE</th>
+                        <th>EDIT</th>
+                        <th>DELETE</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in data %}
+                        <tr>
+                            <td> {{row["classname"]}}</td>
+                            <td> {{row["classid"]}}</td>
+                            <td> {{row["staffname"]}}</td>
+                            <td> {{row["staffid"]}}</td>
+                            <td> {{row["dept"]}}</td>
+                            <td> {{row["year"]}}</td>
+                            <td><a href="{{ url_for('attendance', classname=row['classname'], classid=row['classid']) }}"><button class="btn-attendance">ATTENDANCE</button></a></td>
+                            <td><a href="{{url_for('edit_class',classid = row['classid'])}}"><button class="btn-edit">EDIT</button></a></td>
+                            <td><a href="{{url_for('del_attendance',classname = row['classname'],classid = row['classid'])}}"><button class="btn-delete">DELETE</button></a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

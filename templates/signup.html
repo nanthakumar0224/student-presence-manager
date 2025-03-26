@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGH UP</title>
+    <style>
+        *{
+            margin: 0;
+            padding:0 ;
+            box-sizing: border-box;
+        }
+        body{
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+        }
+        form{
+            display: flex;
+            flex-direction: column;
+            padding: 50px;
+            gap:10px;
+            box-shadow: 5px 5px 5px rgb(143, 141, 141);
+            border-top-left-radius: 50px;
+            border-bottom-right-radius: 50px;
+            border: 0.1px solid rgb(187, 183, 183);
+        }
+
+        form h2{
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 700;
+
+        }
+        .group{
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        input[type="submit"]{
+            height: 34px;
+            font-size: 15px;
+            font-weight: 550;
+            box-shadow: 1px 1px 1px gray;
+            border: none;
+            border-radius: 3px;
+            color: white;
+            padding: 2px;
+            background-color:#007BFF;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover{
+            transform: scale(1.01);
+        }   
+
+        input[type="text"],input[type="password"]{
+            height: 27px;
+            text-indent: 5px;
+            border-radius: 3px;
+            font-size: 15px;
+            font-weight: 550;
+            border-color: rgb(187, 184, 184);
+        }
+
+        input:focus{
+            outline: none;
+            border-color: #007BFF;
+        }
+        label{
+            font-size: 18px;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+	
+	
+        select{
+            height: 27px;
+            text-indent: 5px;
+            border-radius: 3px;
+            font-size: 15px;
+            font-weight: 550;
+            border-color: rgb(187, 184, 184);   
+        }
+        form div a{
+            color: #007BFF;
+            margin-left: 5px;
+        }
+
+    </style>
+</head>
+<body>
+    <form action="/insert_users" method="post">
+        <h2>CREATE ACCOUNT</h2>
+	<select name="select">
+            <option name="select">other</option>
+        </select>
+        <label for="user_name">USER NAME :</label>
+        <input type="text" name="user_name" required>
+        <label for="password">PASSWORD :</label>
+        <input type="password" name="password" required>
+        <label for="confirmpassword">CONFIRM PASSWORD :</label>
+        <input type="password" name="confirmpassword" required>
+        <input type="submit" value="CREATE ACCOUNT">
+        <div class="group">
+            <p>Do you have an account?</p>
+            <a href="{{url_for('login')}}">Signin</a>
+        </div>
+    </form>
+</body>
+</html>

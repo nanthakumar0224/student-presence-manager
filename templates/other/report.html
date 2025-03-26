@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #ddd;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin-right: 10px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <table id="attendanceTable">
+        <thead>
+            <tr>
+                <th>SL.NO</th>
+                <th>ROLL.NO</th>
+                <th>NAME</th>
+                <th>PRESENT</th>
+                <th>ABSENT</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{data['slno']}}</td>
+                <td>{{data['rollno']}}</td>
+                <td>{{data['name']}}</td>
+                <td>{{data['present']}}</td>
+                <td>{{data['absent']}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button onclick="printTable()">PRINT</button>
+    <button onclick="downloadTableAsExcel()">DOWNLOAD</button>
+
+    <script>
+        // Print table function
+        function printTable() {
+            var table = document.getElementById("attendanceTable");
+            var printWindow = window.open('', '', 'height=500, width=800');
+            printWindow.document.write('<html><head><title>Student Attendance Report</title>');
+            printWindow.document.write('<style>table { width: 100%; border-collapse: collapse; } th, td { padding: 10px; text-align: center; border: 1px solid #ddd; } th { background-color: #4CAF50; color: white; } tr:nth-child(even) { background-color: #f2f2f2; }</style></head><body>');
+            printWindow.document.write(table.outerHTML);
+            //printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Function to download the table as an Excel file
+        function downloadTableAsExcel() {
+            var table = document.getElementById("attendanceTable");
+            var excelFile = tableToExcel(table);
+            var link = document.createElement('a');
+            link.href = excelFile;
+            link.download = 'attendance_report.xlsx';
+            link.click();
+        }
+
+        // Convert HTML Table to Excel File (Data URI)
+        function tableToExcel(table) {
+            var tableHtml = table.outerHTML;
+            var excelBlob = new Blob([tableHtml], { type: 'application/vnd.ms-excel' });
+            var excelUrl = URL.createObjectURL(excelBlob);
+            return excelUrl;
+        }
+    </script>
+
+</body>
+</html>

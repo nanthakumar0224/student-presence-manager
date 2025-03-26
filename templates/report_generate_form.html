@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REPORT GENERATE</title>
+    <style>
+        *{
+            margin: 0;
+            padding:0 ;
+            box-sizing: border-box;
+        }
+        body{
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+        }
+        form{
+            display: flex;
+            flex-direction: column;
+            padding: 50px;
+            gap:10px;
+            box-shadow: 5px 5px 5px rgb(143, 141, 141);
+            border-top-left-radius: 50px;
+            border-bottom-right-radius: 50px;
+            border: 0.1px solid rgb(187, 183, 183);
+        }
+
+        form h2{
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 700;
+
+        }
+        input[type="submit"]{
+            height: 34px;
+            font-size: 15px;
+            font-weight: 550;
+            box-shadow: 1px 1px 1px gray;
+            border: none;
+            border-radius: 3px;
+            color: white;
+            padding: 2px;
+            background-color:#007BFF;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover{
+            transform: scale(1.01);
+        }   
+
+        input[type="text"],input[type="date"]{
+            height: 27px;
+            text-indent: 5px;
+            border-radius: 3px;
+            font-size: 15px;
+            font-weight: 550;
+            border-color: rgb(187, 184, 184);
+        }
+
+        input:focus{
+            outline: none;
+            border-color: #007BFF;
+        }
+        label{
+            font-size: 18px;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+	
+
+
+    </style>
+</head>
+<body>
+    <form action="" method="post">
+        <h2>GENERATE REPORT</h2>
+
+        <label for="select">Department Name</label>
+            <select name="dept">
+                <option name="dept">COMPUTER ENGINEERING</option>
+                <option name="dept">INFORMATION TECHNOLOGY</option>
+                <option name="dept">CIVIL ENGINEERING</option>
+                <option name="dept">ELECTRICAL AND ELECTRONIC ENGINEERING</option>
+                <option name="dept">MECHANICAL ENGINEERING</option>
+                <option name="dept">AUTOMOBILE ENGINEERING</option>
+                <option name="dept">ELECTRICAL AND COMMUNICATION ENGINEERING</option>
+            </select>
+
+            <label for="year">Year</label>
+            <select name="year">
+                <option name="year">I</option>
+                <option name="year">Ii</option>
+                <option name="year">III</option>
+            </select>
+
+        <label for="start_date">START DATE :</label>
+        <input type="date" name="start_date" required>
+
+        <label for="end_date">END DATE :</label>
+        <input type="date" name="end_date" required>
+
+        <input type="submit" value="GENERATE REPORT">
+    </form>
+</body>
+</html>
