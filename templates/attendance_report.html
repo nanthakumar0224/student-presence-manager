@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        .header { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
+        .sub-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .left { text-align: left; }
+        .right { text-align: right; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid black; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        .signature { display: flex; justify-content: space-between; margin-top: 50px; font-weight: bold; }
+        .signature div { width: 30%; text-align: center; border-top: 1px solid black; padding-top: 5px; }
+        .buttons { margin: 20px; }
+        button { padding: 10px; font-size: 16px; margin: 5px; cursor: pointer; }
+	@media print {
+    .buttons { display: none; } /* Hide buttons */
+    body { font-size: 14px; }  /* Adjust font size */
+    table { width: 100%; border: 1px solid black; }
+}
+
+    </style>
+    <script>
+        function printReport() {
+            window.print();
+        }
+        function downloadExcel() {
+            window.location.href = "/download_excel?classname={{ classname }}&start_date={{ start_date }}&end_date={{ end_date }}";
+        }
+    </script>
+</head>
+<body>
+    <hr>
+    <br>
+    <div class="header"><u><b>M.S.P.V.L POLYTECHNIC COLLEGE, PAVOORCHATRAM.</u></b></div>
+    <br>
+    <hr>
+    <br>
+    <div class="sub-header">
+        <div class="left">Class Name   : <b>{{ classname }}</b></div>
+        <div class="left">Department   : <b>{{ department }}</b></div>
+        <div class="left">Current Year : <b>{{ year }}</b></div>
+        <div class="right">Date: <b>{{ start_date }} to {{ end_date }}</b></div>
+    </div>
+    <br>
+    <hr>
+    <br>
+    <table>
+        <tr>
+            <th>S.No</th>
+            <th>Student Name</th>
+            <th>Register No</th>
+            <th>Attendance Percentage %</th>
+            <th>Student Sign</th>
+        </tr>
+        {% for student in report_data %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ student.name }}</td>
+            <td>{{ student.rollno }}</td>
+            <td>{{ student.attendance_percentage }}%</td>
+            <td></td> <!-- Empty space for student signature -->
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <hr>
+    <br>
+    <div class="signature">
+        <div>Class Staff Sign</div>
+        <div>HOD Sign</div>
+    </div>
+    <br>
+    <hr>
+    <div class="buttons">
+        <button onclick="downloadExcel()">Save as Excel</button>
+        <button onclick="printReport()">Print</button>
+    </div>
+    <br>
+
+</body>
+</html>
