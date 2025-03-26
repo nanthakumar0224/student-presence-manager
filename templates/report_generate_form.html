@@ -76,7 +76,7 @@
     </style>
 </head>
 <body>
-    <form action="" method="post">
+    <form action="/get_attendance_report_inputs" method="post">
         <h2>GENERATE REPORT</h2>
 
         <label for="select">Department Name</label>
@@ -93,9 +93,16 @@
             <label for="year">Year</label>
             <select name="year">
                 <option name="year">I</option>
-                <option name="year">Ii</option>
+                <option name="year">II</option>
                 <option name="year">III</option>
             </select>
+
+        <label for="classname">Select Class:</label>
+        <select name="classname" id="classname">
+            {% for cls in classes %}
+                <option value="{{ cls }}">{{ cls }}</option>
+            {% endfor %}
+        </select>
 
         <label for="start_date">START DATE :</label>
         <input type="date" name="start_date" required>
