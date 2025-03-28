@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static',filename='files/css/bootstrap.min.css')}}">
+    <script src="{{url_for('static',filename='files/js/jquery.min.js')}}"></script>
     <title>LOGIN</title>
     <style>
         *{
@@ -92,7 +94,8 @@
 </head>
 <body>
     <form action="/login_user_admin" method="post">
-        <h2>LOGIN</h2>
+        <h2>LOGIN FORM</h2>
+      
         <label for="user_name">USER NAME :</label>
         <input type="text" name="user_name"  value='{{username}}' readonly>
         <input type="number" name="user_id"   value="{{userid}}" style="display:none;">

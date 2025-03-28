@@ -84,15 +84,10 @@
 </head>
 <body>
     <form action="/update_class" method="post">
-        <h2>UPDATE CLASS</h2>
-        <label for="classname" style="display:none;">OLD CLASS NAME :</label>
+        <h2>UPDATE CLASS FORM</h2>
         <input type="text" readonly name="oldclassname" value="{{data['classname']}}" style="display:none;">
-        <label for="classteacher" style="display:none;">OLD TEACHER NAME :</label>
-        <input type="text" readonly name="oldclassteacher" value="{{data['classteacher']}}" style="display:none;">
         <label for="classname">CLASS NAME :</label>
         <input type="text" required name="classname" value="{{data['classname']}}">
-        <label for="classteacher">CLASS TEACHER :</label>
-        <input type="text" required name="classteacher" value="{{data['classteacher']}}">
         <label for="classid">CLASS ID</label>
         <input type="number" readonly name="classid" value="{{data['classid']}}">
 

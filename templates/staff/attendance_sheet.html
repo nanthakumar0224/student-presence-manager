@@ -57,10 +57,12 @@
                                 <!-- Hidden field for register number -->
                                 <input type="hidden" name="reg_{{ row['slno'] }}" value="{{ row['rollno'] }}">
                             </td>
-                            <td>{{ row["name"] }}</td>
-
-
-
+                            <td>
+                                {{ row["name"] }}
+                                <!-- Hidden field for name -->
+                                <input type="hidden" name="name_{{ row['slno'] }}" value="{{ row['name'] }}">
+                            </td>
+            
                             <td><input type="checkbox" class="all-checkbox" data-row="{{ row['slno'] }}" value="all"></td>
                             <td><input type="checkbox" class="period-checkbox" name="p1_{{ row['slno'] }}" data-row="{{ row['slno'] }}" value="1"></td>
                             <td><input type="checkbox" class="period-checkbox" name="p2_{{ row['slno'] }}" data-row="{{ row['slno'] }}" value="2"></td>
@@ -75,14 +77,14 @@
                         </tr>
                         {% endfor %}
                     </tbody>
-
                 </table>
                 <div class="btn-group">
                     <button type="submit">SAVE</button>
                     <button type="reset" onclick="clearForm()">CLEAR</button>
-
                 </div>
             </form>
+            
+            
             
         </div>
     </div>

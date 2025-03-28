@@ -88,11 +88,26 @@
             color: #007BFF;
             margin-left: 5px;
         }
+        .flash-message {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .flash-message.success {
+            background-color: #28a745; /* Green */
+            color: white;
+        }
+        .flash-message.error {
+            background-color: #dc3545; /* Red */
+            color: white;
+        }
     </style>
 </head>
 <body>
     <form action="/login_user_staff" method="post">
-        <h2>LOGIN</h2>
+        <h2>LOGIN FORM</h2>
+       
         <label for="user_name">USER NAME :</label>
         <input type="text" name="user_name"  required>
         <label for="user_id">USER ID :</label>

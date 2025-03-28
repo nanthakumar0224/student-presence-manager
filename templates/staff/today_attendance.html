@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STUDENT PRESENCE MANAGER</title>
+    <link rel="stylesheet" href="\static\css\attendance_sheet.css">
+</head>
+<body>
+
+    <div class="sidebar">
+        <img src="\static\images\logo.jpg">
+        <ul>
+            <li><a href="{{url_for('manage_classes_staff')}}">Manage Classes</a></li>
+            <li><a href="{{url_for('report_generate_form')}}">Manage Reports</a></li>
+            <li><a href="{{url_for('home')}}">Logout</a></li>
+        </ul>
+    </div>
+
+    <div class="img_container">
+        <div class="all-attendance-table">
+            <h1>TODAY ATTENDANCE</h1>
+            
+        
+            <form action="/edit_today_attendance" method="post" class="table-form">
+                <input type="text" name="classname" value="{{ classname }}" readonly style="display:none;">
+                <input type="number" name="classid" value="{{ classid }}" readonly style="display:none;">
+               
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SL.NO</th>
+                            <th>ROLL.NO</th>
+                            <th>NAME</th>
+                            <th>PRESENT</th>
+                            <th>ABSENT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data %}
+                        <tr>
+                            <td>{{ row["slno"] }}</td>
+                            <td>{{ row["rollno"] }}</td>
+                            <td>{{ row["name"] }}</td>
+                            <td>{{ row["present"]}}</td>
+                            <td>{{ row["absent"]}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table> 
+
+                <div class="btn-group">            
+                    <button type="submit">EDIT</button>
+                </div>
+                
+            </form>
+            
+        </div>
+    </div>
+
+</body>
+</html>

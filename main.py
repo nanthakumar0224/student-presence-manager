@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request,session,send_file
+from flask import Flask, render_template, request,session,send_file,flash,url_for,redirect
 import sqlite3
 import pandas as pd
 import datetime
@@ -30,10 +30,12 @@ def login_user_admin():
     user_name = request.form['user_name']
     password = request.form['password']
     userid = request.form['user_id']
-    if user_name == "Admin" and password == "123" and userid =="0":
+    
+    if user_name == "Admin" and password == "123" and userid == "0":
         return render_template("admin/index.html")
     else:
-        return "username or password invalid "
+        return "Username or password invalid.", "error"
+
 
 #-----------------------------------------------------------------------------------------------------------------#
 
@@ -223,42 +225,33 @@ def edit_class(classid):
 def update_class():
     in_classname = request.form['classname']
     in_classid = request.form['classid']
-    in_classteacher = request.form['classteacher']
-
     in_oldclassname = request.form['oldclassname']
-    in_oldclassteacher = request.form['oldclassteacher']
+
     con = sqlite3.connect('data_base.db')
     cur = con.cursor()
-    if in_oldclassname == in_classname and in_oldclassteacher == in_classteacher:
-        return "No changes"
-    elif in_oldclassname == in_classname and in_oldclassteacher != in_classteacher:
-        cur.execute("UPDATE all_classes SET classname= ?, classteacher=? WHERE classid=?",
-                    (in_classname, in_classteacher, in_classid))
-        con.commit()
-        con.close()
-        return "Class Teacher Updated Successfully !!"
 
-    elif in_oldclassname != in_classname and in_oldclassteacher == in_classteacher:
-        cur.execute("UPDATE all_classes SET classname= ?, classteacher=? WHERE classid=?",
-                    (in_classname, in_classteacher, in_classid))
+    if in_oldclassname == in_classname:
+        return "NO changes"
+        
+    else:
+        cur.execute("SELECT * FROM all_classes WHERE classname = ?", (in_classname,))
+        data = cur.fetchall()
+        if data:
+            return "The class name already exists"
 
-        query = F"ALTER TABLE {in_oldclassname} RENAME TO {in_classname}"
-        
-        cur.execute(query)
-        
-        con.commit()
+        cur.execute("UPDATE all_classes SET classname = ? WHERE classid = ?", (in_classname, in_classid))
+
+        try:
+            query = f"ALTER TABLE '{in_oldclassname}' RENAME TO '{in_classname}'"
+            cur.execute(query)
+            con.commit()
+        except sqlite3.OperationalError as e:
+            return f"Error in renaming class: {e}"
+
         con.close()
         return "Class Name Updated Successfully !!"
-    else:
-        cur.execute("UPDATE all_classes SET classname= ?, classteacher=? WHERE classid=?",
-                    (in_classname, in_classteacher, in_classid))
 
-        query = F"ALTER TABLE {in_oldclassname} RENAME TO {in_classname}"
-
-        cur.execute(query)
-        con.commit()
-        con.close()
-        return "Class Name and Teacher Name Updated Successfully !!"
+    
 
 #------------------------------------------------------------------------------------------------------------------------------#
 
@@ -358,45 +351,62 @@ def delete_staff(staffid):
 
 @app.route("/attendance/<string:classname>/<int:classid>", methods=["GET", "POST"])
 def attendance(classname, classid):
+    
     formatted_date = datetime.date.today().strftime('%Y-%m-%d')
     con = sqlite3.connect("data_base.db")
     con.row_factory = sqlite3.Row
     cur = con.cursor()
-    query = f"SELECT * FROM {classname} WHERE date = {formatted_date}"
-    cur.execute(query)
+    query = f"SELECT * FROM {classname} WHERE date = ?"
+    cur.execute(query, (formatted_date,))
     data = cur.fetchall()
     if data:
         con.close()
-        return "Your attendance closed"
+        return render_template("staff/today_attendance.html", data=data,classname = classname,classid = classid)
     else:
         query = f"SELECT * FROM all_students WHERE classid = {classid}"
         cur.execute(query)
         data = cur.fetchall()
-        
+        con.close()
         return render_template("staff/attendance_sheet.html",data = data,classname = classname,classid = classid)
+        
 
+@app.route("/edit_today_attendance", methods=["GET", "POST"]) 
+def edit_today_attendance():
+    classname = request.form['classname']
+    classid = request.form['classid']
+    con = sqlite3.connect("data_base.db")
+    con.row_factory = sqlite3.Row
+    cur = con.cursor()
+    query = f"SELECT * FROM all_students WHERE classid = {int(classid)}"
+    cur.execute(query)
+    data = cur.fetchall()
+    return render_template("staff/today_attendance_update_sheet.html",data = data,classname = classname,classid = classid)
+    
+    
 
-#save attendance
-def insert_attendance(register_number, present, absent, current_date, classname):
+def update_attendance(register_number, present, absent, current_date, classname):
     try:
         conn = sqlite3.connect('data_base.db')
         cursor = conn.cursor()
 
+        # Update query to update attendance for the given register number and date
         query = f"""
-        INSERT INTO {classname} (rollno, date, present, absent)
-        VALUES (?, ?, ?, ?)
+        UPDATE {classname}
+        SET present = ?, absent = ?
+        WHERE rollno = ? AND date = ?
         """
 
-        cursor.execute(query, (register_number, current_date, present, absent))
+        cursor.execute(query, (present, absent, register_number, current_date))
         conn.commit()
         conn.close()
 
     except Exception as e:
-        print(f"Error inserting attendance: {e}")
+        print(f"Error updating attendance: {e}")
 
 
-@app.route('/save_attendance', methods=['POST'])
-def save_attendance():
+
+@app.route('/update_today_attendance', methods=['POST'])
+def update_today_attendance():
     current_date = datetime.date.today().strftime('%Y-%m-%d')
     in_classname = request.form['classname']
     processed_students = set()
@@ -426,7 +436,8 @@ def save_attendance():
                     else:
                         absent += 1
 
-                insert_attendance(register_no, present, absent, current_date, in_classname)
+                # Call the update function instead of insert
+                update_attendance(register_no, present, absent, current_date, in_classname)
 
                 processed_students.add(register_no)
 
@@ -435,6 +446,83 @@ def save_attendance():
                 continue
 
     return "Attendance updated successfully!"
+
+
+
+
+
+#save attendance
+def insert_attendance(register_number, present, absent, current_date, classname):
+    try:
+        conn = sqlite3.connect('data_base.db')
+        cursor = conn.cursor()
+
+        query = f"""
+        INSERT INTO {classname} (rollno, date, present, absent)
+        VALUES (?, ?, ?, ?)
+        """
+
+        cursor.execute(query, (register_number, current_date, present, absent))
+        conn.commit()
+        conn.close()
+
+    except Exception as e:
+        print(f"Error inserting attendance: {e}")
+
+
+@app.route('/save_attendance', methods=['POST'])
+def save_attendance():
+    current_date = datetime.date.today().strftime('%Y-%m-%d')
+    in_classname = request.form['classname']
+    processed_students = set()
+
+    # Debugging: Log the entire form data
+    print("Form data:", request.form)
+
+    for key in request.form:
+        if key.startswith('p'):  # Identifying attendance-related fields
+            try:
+                student_slno = key.split('_')[1]  # Extract serial number (slno)
+                student_slno = int(student_slno)
+
+                # Get the register number (rollno) from form data
+                register_no = request.form.get(f'reg_{student_slno}')
+                student_name = request.form.get(f'name_{student_slno}')
+                
+                # Debugging: Log values of rollno and name
+                print(f"Processing student slno: {student_slno}, Register No: {register_no}, Name: {student_name}")
+
+                # Check if rollno or name is missing
+                if not register_no or not student_name:
+                    print(f"Error: Missing register number or name for slno {student_slno}")
+                    continue
+
+                # Skip if this register number has already been processed
+                if register_no in processed_students:
+                    continue
+
+                present = 0
+                absent = 0
+
+                # Count periods marked as present or absent
+                for period in range(1, 9):
+                    if f'p{period}_{student_slno}' in request.form:
+                        present += 1
+                    else:
+                        absent += 1
+
+                # Insert attendance into the database
+                insert_attendance(register_no, present, absent, current_date, in_classname)
+
+                # Mark this register number as processed
+                processed_students.add(register_no)
+
+            except IndexError:
+                print(f"Error processing attendance for form field: {key}")
+                continue
+
+    return "Attendance updated successfully!"
+
 
 
 #----------------------------------------------------------------------------------------------------#
