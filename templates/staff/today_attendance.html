@@ -39,7 +39,7 @@
                     <tbody>
                         {% for row in data %}
                         <tr>
-                            <td>{{ row["slno"] }}</td>
+                            <td>{{ loop.index }}</td>
                             <td>{{ row["rollno"] }}</td>
                             <td>{{ row["name"] }}</td>
                             <td>{{ row["present"]}}</td>

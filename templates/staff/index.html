@@ -10,7 +10,13 @@
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-
+{% with msg=get_flashed_messages() %}
+{% if msg %}
+<script>
+    alert("{{msg[0]}}");
+</script>
+{% endif %}
+{% endwith %}
     <div class="sidebar">
         <img src="\static\images\logo.jpg">
         <ul>

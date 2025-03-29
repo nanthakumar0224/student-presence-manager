@@ -93,6 +93,13 @@
     </style>
 </head>
 <body>
+{% with msg=get_flashed_messages() %}
+{% if msg %}
+<script>
+    alert("{{msg[0]}}");
+</script>
+{% endif %}
+{% endwith %}
     <form action="/login_user_admin" method="post">
         <h2>LOGIN FORM</h2>
       

@@ -32,9 +32,13 @@ def login_user_admin():
     userid = request.form['user_id']
     
     if user_name == "Admin" and password == "123" and userid == "0":
+        flash('login successful..!!','success')
         return render_template("admin/index.html")
     else:
-        return "Username or password invalid.", "error"
+        flash("Username or password invalid..:)", "danger")
+        username = "Admin"
+        userid = 0
+        return render_template("admin/login.html", username=username, userid=userid)
 
 
 #-----------------------------------------------------------------------------------------------------------------#
@@ -63,9 +67,11 @@ def login_user_staff():
     if data:
         session['staffid'] = staffid
         session['staffname'] = staff_name
+        flash('login successful...!!', 'success')
         return render_template("staff/index.html")
     else:
-        return "invalid user or password"
+        flash("Username or password invalid :)", "danger")
+        return render_template("staff/login.html")
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
@@ -112,7 +118,7 @@ def manage_classes_staff():
     staffid = session.get('staffid')
     staffname = session.get('staffname')
     query = f"select * from all_classes where staffid ={staffid}"
-    cur.execute(query )
+    cur.execute(query)
     data = cur.fetchall()
     con.close()
     return render_template("staff/manage_classes.html", data=data,staffid =staffid ,staffname = staffname )
@@ -145,12 +151,14 @@ def create_class():
         cur.execute("SELECT * FROM all_classes WHERE classname = ?", (in_classname,))
         data = cur.fetchone()
         if data:
-            return "Class Name already exists, give a valid class name."
+            flash("Class Name already exists, give a valid class name.","danger")
+            return redirect(url_for('manage_classes_staff'))
 
         cur.execute("SELECT * FROM all_classes WHERE classid = ?", (in_classid,))
         data = cur.fetchone()
         if data:
-            return "Class ID already exists, give a valid class ID."
+            flash("Class ID already exists, give a valid class ID.","danger")
+            return redirect(url_for('manage_classes_staff'))
 
         cur.execute("INSERT INTO all_classes(classname, classid, staffname,staffid,dept,year) VALUES(?,?,?,?,?,?)",
                     (in_classname, in_classid, in_staffname,in_staffid,dept,year))
@@ -183,7 +191,9 @@ def create_class():
         df['year'] = year
         df.to_sql("all_students", con, if_exists='append', index=False)
         con.commit()
-        return "Class created successfully"
+        flash("Class created successfully","success")
+        return redirect(url_for('manage_classes_staff'))
+
 
     except sqlite3.Error as e:
         return f"Error occurred: {e}"
@@ -356,19 +366,20 @@ def attendance(classname, classid):
     con = sqlite3.connect("data_base.db")
     con.row_factory = sqlite3.Row
     cur = con.cursor()
-    query = f"SELECT * FROM {classname} WHERE date = ?"
+    query = f"""SELECT s.name,c.rollno,c.present,c.absent,c.date FROM  all_students s JOIN {classname} c ON s.rollno = c.rollno WHERE c.date = ?"""
     cur.execute(query, (formatted_date,))
     data = cur.fetchall()
     if data:
         con.close()
         return render_template("staff/today_attendance.html", data=data,classname = classname,classid = classid)
     else:
+
         query = f"SELECT * FROM all_students WHERE classid = {classid}"
         cur.execute(query)
         data = cur.fetchall()
         con.close()
         return render_template("staff/attendance_sheet.html",data = data,classname = classname,classid = classid)
-        
+
 
 @app.route("/edit_today_attendance", methods=["GET", "POST"]) 
 def edit_today_attendance():
@@ -468,6 +479,9 @@ def insert_attendance(register_number, present, absent, current_date, classname)
 
     except Exception as e:
         print(f"Error inserting attendance: {e}")
+
+
+
 
 
 @app.route('/save_attendance', methods=['POST'])
@@ -671,6 +685,28 @@ def others_report():
     conn.close()
     return render_template('other/report.html',classes=classes,student_data=student_data)
 
+
+"""@app.route("/attendance/<string:classname>/<int:classid>", methods=["GET", "POST"])
+def attendance(classname, classid):
+
+    formatted_date = datetime.date.today().strftime('%Y-%m-%d')
+    con = sqlite3.connect("data_base.db")
+    con.row_factory = sqlite3.Row
+    cur = con.cursor()
+
+    query = f"SELECT * FROM {classname} WHERE date = ?"
+    cur.execute(query, (formatted_date,))
+    data = cur.fetchall()
+    if data:
+        con.close()
+        return render_template("staff/today_attendance.html", data=data,classname = classname,classid = classid)
+    else:
+        query = f"SELECT * FROM all_students WHERE classid = {classid}"
+        cur.execute(query)
+        data = cur.fetchall()
+        con.close()
+        return render_template("staff/attendance_sheet.html",data = data,classname = classname,classid = classid)
+   """
 
 if __name__ == '__main__':
     app.run(debug=True)
